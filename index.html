@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+<meta name="theme-color" content="#456B59">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="AttendWise">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192' width='192' height='192'%3E%3Crect width='192' height='192' rx='42' fill='%23456B59'/%3E%3Cpath d='M50 102 L80 132 L142 66' stroke='%23C5DDD0' stroke-width='18' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192' width='192' height='192'%3E%3Crect width='192' height='192' rx='42' fill='%23456B59'/%3E%3Cpath d='M50 102 L80 132 L142 66' stroke='%23C5DDD0' stroke-width='18' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
+<title>AttendWise – Personal Attendance Tracker</title>
+<style>
+:root{
+  --bg:#EAF4EF;
+  --panel:rgba(255,255,255,.62);
+  --text:#244234;
+  --muted:#577465;
+  --line:rgba(255,255,255,.82);
+  --primary:#6F9F87;
+  --primary2:#58866f;
+  --green:#2e7d52;
+  --red:#be4c47;
+  --amber:#a8741e;
+  --shadow:0 8px 24px rgba(69,107,89,.08);
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  margin:0;
+  background:radial-gradient(ellipse at 8% 4%,rgba(197,221,208,.65),transparent 34%),radial-gradient(ellipse at 94% 8%,rgba(248,230,181,.42),transparent 28%),linear-gradient(135deg,#EAF4EF 0%,#F5EDDA 54%,#EAF4EF 100%);
+  background-attachment:fixed;
+  color:var(--text);
+  font:15px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  min-height:100vh;
+  min-height:100dvh;
+  padding-left:var(--sal);
+  padding-right:var(--sar);
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;touch-action:manipulation}
+
+.app{display:grid;grid-template-columns:250px 1fr;min-height:100vh;min-height:100dvh}
+.sidebar{
+  background:rgba(255,255,255,.45);
+  color:#315343;
+  padding:24px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+  border-right:1px solid rgba(255,255,255,.85);
+  backdrop-filter:blur(24px);
+  -webkit-backdrop-filter:blur(24px);
+}
+.brand{font-size:22px;font-weight:800;letter-spacing:-.7px;padding:0 10px;color:#244234}
+.brand span{background:linear-gradient(100deg,#4f7d66,#83AD96);-webkit-background-clip:text;background-clip:text;color:transparent}
+.subbrand{color:var(--muted);font-size:12px;padding:0 10px;margin-top:-14px}
+.nav{display:grid;gap:6px}
+.nav button{
+  border:0;
+  background:transparent;
+  color:#456b59;
+  text-align:left;
+  padding:12px 14px;
+  border-radius:13px;
+  font-weight:650;
+  transition:all .2s ease;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.nav button:hover{background:rgba(197,221,208,.4);color:#244234;transform:translateX(3px)}
+.nav button.active{
+  color:#1e3c2e;
+  background:linear-gradient(120deg,rgba(197,221,208,.8),rgba(255,255,255,.8));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.9),0 4px 14px rgba(69,107,89,.08);
+}
+.side-note{margin-top:auto;color:var(--muted);font-size:12px;padding:10px;line-height:1.4}
+
+.main{
+  padding:calc(20px + var(--sat)) 28px calc(30px + var(--sab));
+  max-width:1400px;
+  width:100%;
+  margin:0 auto;
+}
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:14px;
+  margin-bottom:20px;
+  flex-wrap:wrap;
+}
+.topbar-titles{flex:1;min-width:200px}
+.topbar h1{font-size:26px;letter-spacing:-.7px;margin:0;color:#244234;font-weight:800}
+.topbar p{margin:4px 0 0;color:var(--muted);font-size:13.5px}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+.local-save-indicator{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:7px 11px;
+  border-radius:999px;
+  background:rgba(197,221,208,.55);
+  border:1px solid rgba(255,255,255,.85);
+  color:#2f5341;
+  font-size:11.5px;
+  font-weight:700;
+  white-space:nowrap;
+}
+.local-save-indicator:before{
+  content:"";width:7px;height:7px;border-radius:50%;background:#4f7d66;
+  box-shadow:0 0 0 3px rgba(111,159,135,.2);
+}
+
+.btn{
+  border:1px solid rgba(255,255,255,.9);
+  background:rgba(255,255,255,.75);
+  color:#244234;
+  padding:9px 15px;
+  border-radius:999px;
+  font-weight:700;
+  font-size:13.5px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  min-height:38px;
+  box-shadow:0 3px 0 rgba(111,159,135,.18),0 5px 12px rgba(69,107,89,.06);
+  transition:transform .15s ease,box-shadow .15s ease,background .15s ease;
+  user-select:none;
+}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 0 rgba(111,159,135,.2),0 8px 16px rgba(69,107,89,.1)}
+.btn:active{transform:translateY(2px) scale(.98);box-shadow:0 1px 0 rgba(111,159,135,.2)}
+.btn.primary{
+  color:#fff;
+  background:linear-gradient(145deg,#84B69C,#5D9378);
+  border:1px solid rgba(255,255,255,.6);
+  box-shadow:0 4px 0 #4a7a62,0 8px 18px rgba(74,122,98,.24);
+}
+.btn.primary:hover{background:linear-gradient(145deg,#8fc2a7,#659e82)}
+.btn.primary:active{box-shadow:0 1px 0 #4a7a62;transform:translateY(3px) scale(.98)}
+.btn.danger{color:#b94742;background:rgba(255,242,242,.85);border-color:rgba(238,202,194,.8)}
+.btn.small{padding:5px 11px;font-size:12px;min-height:32px;border-radius:999px}
+.btn.full-width{width:100%}
+
+.grid{display:grid;gap:14px}
+.stats{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:16px}
+.two{grid-template-columns:1.25fr .75fr}
+.subject-grid{grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+
+.card{
+  background:rgba(255,255,255,.62);
+  border:1px solid rgba(255,255,255,.88);
+  border-radius:20px;
+  padding:18px;
+  box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.8);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  transition:transform .2s ease,box-shadow .2s ease;
+}
+.stat-label,.muted{color:var(--muted);font-size:13px;font-weight:600}
+.stat-value{
+  font-size:28px;
+  font-weight:850;
+  letter-spacing:-1px;
+  margin-top:3px;
+  background:linear-gradient(100deg,#244234,#5d9378);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  line-height:1.15;
+}
+.small-text{font-size:12px;color:var(--muted)}
+.section-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:20px 0 10px}
+.section-head h2{font-size:17px;margin:0;color:#244234;font-weight:750}
+
+.subject-card{display:flex;flex-direction:column;gap:11px}
+.subject-title{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.subject-title h3{font-size:15.5px;margin:0;color:#244234;font-weight:750;line-height:1.25}
+
+.pill{
+  display:inline-flex;
+  align-items:center;
+  padding:4px 9px;
+  border-radius:999px;
+  font-size:11.5px;
+  font-weight:750;
+  background:rgba(197,221,208,.6);
+  color:#244234;
+  border:1px solid rgba(255,255,255,.75);
+  box-shadow:0 2px 6px rgba(69,107,89,.04);
+  white-space:nowrap;
+}
+.pill.good{background:rgba(182,230,201,.7);color:#195a37}
+.pill.warn{background:rgba(254,236,180,.8);color:#7c5612}
+.pill.bad{background:rgba(247,208,204,.85);color:#8d2d28}
+.pill.neutral{background:rgba(235,237,243,.85);color:#577465}
+
+.progress,.chart-track{
+  height:9px;
+  background:rgba(197,221,208,.4);
+  border-radius:99px;
+  overflow:hidden;
+  box-shadow:inset 0 1px 3px rgba(69,107,89,.08);
+}
+.progress span{
+  display:block;
+  height:100%;
+  border-radius:99px;
+  background:linear-gradient(90deg,#70a88c,#98cbb0,#6aa085);
+  background-size:180% 100%;
+  animation:barShimmer 4s linear infinite;
+  transition:width .55s cubic-bezier(.2,.8,.2,1);
+}
+.progress span.badbar{background:linear-gradient(90deg,#d97972,#c45751)}
+.progress span.warnbar{background:linear-gradient(90deg,#e5be6b,#c79e46)}
+.chart-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#6da387,#a6d2bc);transition:width .6s ease}
+
+.donut{
+  width:96px;
+  height:96px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:conic-gradient(#5d9378 var(--value),rgba(197,221,208,.35) 0);
+  position:relative;
+  flex:0 0 auto;
+}
+.donut:before{content:"";position:absolute;inset:9px;background:rgba(255,255,255,.88);border-radius:50%}
+.donut strong{position:relative;font-size:19px;letter-spacing:-.6px;color:#244234;font-weight:800}
+
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.row.wrap{flex-wrap:wrap}
+
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.field{display:grid;gap:5px}
+.field label{font-size:12.5px;color:var(--muted);font-weight:700}
+.field input,.field select,.field textarea,.status-select{
+  width:100%;
+  border:1px solid rgba(255,255,255,.95);
+  background:rgba(255,255,255,.8);
+  color:#244234;
+  border-radius:12px;
+  padding:10px 12px;
+  min-width:0;
+  font-size:14px;
+  box-shadow:inset 0 1px 3px rgba(69,107,89,.04);
+}
+.field input:focus,.field select:focus,.field textarea:focus,.status-select:focus{
+  outline:2px solid rgba(111,159,135,.5);
+  border-color:#6F9F87;
+  background:#fff;
+}
+.field textarea{min-height:75px;resize:vertical}
+.field.full{grid-column:1/-1}
+
+.tabs{
+  display:flex;
+  gap:7px;
+  margin-bottom:14px;
+  overflow-x:auto;
+  padding-bottom:3px;
+  -webkit-overflow-scrolling:touch;
+}
+.tabs button{
+  border:1px solid rgba(255,255,255,.85);
+  background:rgba(255,255,255,.6);
+  color:var(--muted);
+  border-radius:999px;
+  padding:8px 15px;
+  font-weight:700;
+  font-size:13px;
+  white-space:nowrap;
+  transition:all .18s ease;
+}
+.tabs button.active{
+  background:rgba(197,221,208,.8);
+  border-color:rgba(255,255,255,.98);
+  color:#1e3c2e;
+  box-shadow:0 3px 10px rgba(69,107,89,.08);
+}
+
+.table-wrap{
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  margin:0 -4px;
+  border-radius:12px;
+}
+table{border-collapse:collapse;width:100%;min-width:540px}
+th,td{text-align:left;padding:11px 9px;border-bottom:1px solid rgba(145,185,165,.2);font-size:13px}
+th{color:var(--muted);font-weight:750;background:rgba(197,221,208,.25)}
+td strong{font-size:13.5px;color:#244234}
+
+.empty{padding:26px 14px;text-align:center;color:var(--muted);font-size:13.5px}
+.notice{
+  background:rgba(254,243,199,.7);
+  border:1px solid rgba(255,255,255,.9);
+  color:#825a13;
+  padding:12px 14px;
+  border-radius:14px;
+  font-size:13px;
+  margin-bottom:14px;
+  line-height:1.4;
+}
+.success-note{
+  background:rgba(209,245,224,.6);
+  border:1px solid rgba(255,255,255,.9);
+  color:#1e5837;
+  padding:12px 14px;
+  border-radius:14px;
+  font-size:13px;
+  line-height:1.4;
+}
+.hidden{display:none!important}
+
+/* Modal responsive dialog */
+.modal-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(30,55,42,.35);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  z-index:100;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+.modal-backdrop.show{display:flex}
+.modal{
+  background:rgba(252,254,252,.96);
+  border:1px solid rgba(255,255,255,.95);
+  border-radius:24px;
+  padding:22px;
+  width:min(580px,100%);
+  max-height:88vh;
+  max-height:88dvh;
+  overflow-y:auto;
+  box-shadow:0 24px 60px rgba(20,40,30,.2);
+  color:#244234;
+}
+.modal h2{margin:0 0 14px;font-size:19px;font-weight:800}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;flex-wrap:wrap}
+
+/* Calendar */
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.cal-head,.cal-day{text-align:center;padding:7px 2px;font-size:12px}
+.cal-head{color:var(--muted);font-weight:750}
+.cal-day{
+  background:rgba(255,255,255,.6);
+  border:1px solid rgba(255,255,255,.9);
+  border-radius:12px;
+  min-height:56px;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  transition:transform .15s ease,box-shadow .15s ease;
+  padding:4px 2px;
+}
+.cal-day strong{font-size:13px;color:#244234}
+.cal-day:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(69,107,89,.08)}
+.cal-day.muted-day{opacity:.35;pointer-events:none}
+.cal-day.present{background:linear-gradient(145deg,rgba(197,221,208,.85),rgba(255,255,255,.7));border-color:#b9dcc6}
+.cal-day.absent{background:linear-gradient(145deg,rgba(247,208,204,.75),rgba(255,255,255,.7));border-color:#e8beba}
+.cal-day.partial{background:linear-gradient(145deg,rgba(254,236,180,.8),rgba(255,255,255,.7));border-color:#e6d29b}
+.cal-day.holiday{background:linear-gradient(145deg,rgba(235,237,243,.8),rgba(255,255,255,.7));border-color:#d4d9e2}
+.cal-day.selected{outline:2.5px solid #5d9378;outline-offset:1px}
+.calendar-detail{margin-top:14px}
+
+.footer{font-size:11.5px;color:var(--muted);margin-top:22px;text-align:center;line-height:1.45}
+.mobile-nav{display:none}
+
+/* Daily Entry card and Lecture rows styling */
+.daily-subject{border-top:1px solid rgba(145,185,165,.25);padding:14px 0}
+.lecture-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:8px;
+  padding:6px 10px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.9);
+  transition:background .2s ease,border-color .2s ease;
+}
+.lecture-row .lecture-label{flex:1;min-width:110px}
+.lecture-row .lecture-status{width:auto;min-width:125px;font-weight:700}
+.lecture-row.status-present{background:linear-gradient(145deg,rgba(197,221,208,.85),rgba(255,255,255,.75));border-color:#b9dcc6}
+.lecture-row.status-present .lecture-status{background:rgba(209,245,224,.9);color:#195a37;border-color:#b9dcc6}
+.lecture-row.status-absent{background:linear-gradient(145deg,rgba(247,208,204,.8),rgba(255,255,255,.75));border-color:#e8beba}
+.lecture-row.status-absent .lecture-status{background:rgba(254,226,226,.9);color:#8d2d28;border-color:#e8beba}
+.lecture-row.status-pending{background:linear-gradient(145deg,rgba(254,236,180,.8),rgba(255,255,255,.75));border-color:#e6d29b}
+.lecture-row.status-pending .lecture-status{background:rgba(254,243,199,.9);color:#7c5612;border-color:#e6d29b}
+.lecture-row.status-not_conducted{background:linear-gradient(145deg,rgba(235,237,243,.85),rgba(255,255,255,.75));border-color:#d4d9e2}
+.lecture-row.status-not_conducted .lecture-status{background:rgba(241,245,249,.9);color:#577465;border-color:#d4d9e2}
+
+@keyframes barShimmer{0%{background-position:0 0}100%{background-position:180% 0}}
+@keyframes natureAppear{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+#appContent>.card,#appContent>.grid,#appContent>.section-head{animation:natureAppear .28s ease both}
+
+/* ==============================================================
+   PHONE & TOUCH OPTIMIZATIONS (PWA & Small Viewports)
+   ============================================================== */
+@media(max-width:900px){
+  .app{grid-template-columns:1fr;display:block}
+  .sidebar{display:none}
+
+  /* Fixed, safe-area padded bottom navigation bar */
+  .mobile-nav{
+    display:grid!important;
+    grid-template-columns:repeat(6,1fr);
+    position:fixed;
+    left:10px;
+    right:10px;
+    bottom:calc(8px + var(--sab));
+    background:rgba(255,255,255,.88)!important;
+    border:1px solid rgba(255,255,255,.95);
+    border-radius:24px;
+    padding:6px 4px;
+    z-index:90;
+    backdrop-filter:blur(25px);
+    -webkit-backdrop-filter:blur(25px);
+    box-shadow:0 8px 30px rgba(40,70,55,.16);
+  }
+  .mobile-nav button{
+    background:transparent;
+    border:0;
+    color:var(--muted)!important;
+    font-size:11px;
+    font-weight:700;
+    padding:6px 2px;
+    border-radius:14px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:2px;
+    min-height:48px;
+    transition:all .18s ease;
+    line-height:1.15;
+  }
+  .mobile-nav button .nav-icon{font-size:16px;line-height:1}
+  .mobile-nav button.active{
+    color:#1e3c2e!important;
+    background:rgba(197,221,208,.65);
+    font-weight:800;
+  }
+
+  .main{
+    padding:calc(12px + var(--sat)) 14px calc(88px + var(--sab));
+  }
+  .topbar{
+    flex-direction:column;
+    align-items:stretch;
+    gap:10px;
+    margin-bottom:16px;
+  }
+  .topbar-titles{display:flex;justify-content:space-between;align-items:flex-start}
+  .topbar h1{font-size:22px}
+  .top-actions{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:8px;
+    width:100%;
+  }
+  .top-actions .local-save-indicator{
+    grid-column:1/-1;
+    justify-content:center;
+    width:100%;
+    order:-1;
+  }
+  .top-actions .btn{width:100%;text-align:center}
+
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .two{grid-template-columns:1fr;gap:14px}
+  .subject-grid{grid-template-columns:1fr;gap:10px}
+
+  .card{padding:14px;border-radius:18px}
+  .stat-value{font-size:24px}
+  .donut{width:82px;height:82px}
+  .donut strong{font-size:16.5px}
+
+  .modal-backdrop{padding:10px;align-items:flex-end}
+  .modal{
+    border-radius:24px 24px 14px 14px;
+    width:100%;
+    max-height:86vh;
+    max-height:86dvh;
+    padding:18px 16px;
+  }
+  .modal-actions{display:grid;grid-template-columns:1fr 1fr;width:100%}
+  .modal-actions .btn{width:100%}
+}
+
+@media(max-width:540px){
+  .form-grid{grid-template-columns:1fr}
+  .field.full{grid-column:1}
+  
+  /* Touch target size improvements */
+  .btn{min-height:42px;padding:8px 14px}
+  .btn.small{min-height:36px;padding:6px 10px}
+  
+  .lecture-row{
+    flex-direction:column;
+    align-items:stretch;
+    gap:6px;
+    padding:10px;
+    border-radius:14px;
+  }
+  .lecture-row .lecture-status{width:100%}
+  .lecture-row .remove-lecture{width:100%;margin-top:2px}
+
+  .cal-day{min-height:46px;padding:3px 1px;border-radius:9px}
+  .cal-day strong{font-size:11.5px}
+  .cal-day .small-text{font-size:9.5px;letter-spacing:-.2px}
+  
+  /* Better responsive tables */
+  .table-wrap table{font-size:12px}
+  th,td{padding:8px 6px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{
+    animation:none!important;
+    transition:none!important;
+    scroll-behavior:auto!important;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">Attend<span>Wise</span></div>
+    <div class="subbrand">Your personal academic tracker</div>
+    <nav class="nav" id="sideNav">
+      <button class="active" data-page="dashboard"><span style="font-size:17px">▦</span> Dashboard</button>
+      <button data-page="attendance"><span style="font-size:17px">✓</span> Attendance entry</button>
+      <button data-page="subjects"><span style="font-size:17px">▤</span> Subjects & semesters</button>
+      <button data-page="calendar"><span style="font-size:17px">▦</span> Calendar & history</button>
+      <button data-page="analytics"><span style="font-size:17px">⌁</span> Analytics</button>
+      <button data-page="settings"><span style="font-size:17px">⚙</span> Settings & backup</button>
+    </nav>
+    <div class="side-note">✿ Offline-ready & saved on device<br>No cloud login · Pure privacy</div>
+  </aside>
+  
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-titles">
+        <h1 id="pageTitle">Dashboard</h1>
+        <p id="pageSubtitle">Your attendance at a glance.</p>
+      </div>
+      <div class="top-actions">
+        <span class="local-save-indicator" title="Your attendance records are stored in this browser on this device">● Stored on device</span>
+        <button class="btn" id="quickAdd">＋ Subject</button>
+        <button class="btn primary" id="quickAttendance">＋ Mark today</button>
+      </div>
+    </header>
+    <div id="appContent"></div>
+    <footer class="footer">AttendWise PWA · Offline local tracker · Keep backups from Settings</footer>
+  </main>
+</div>
+
+<!-- Bottom Navigation for Phones / Mobile Viewports -->
+<nav class="mobile-nav" id="mobileNav">
+  <button class="active" data-page="dashboard"><span class="nav-icon">▦</span><span>Home</span></button>
+  <button data-page="attendance"><span class="nav-icon">✓</span><span>Entry</span></button>
+  <button data-page="subjects"><span class="nav-icon">▤</span><span>Subjects</span></button>
+  <button data-page="calendar"><span class="nav-icon">📅</span><span>Calendar</span></button>
+  <button data-page="analytics"><span class="nav-icon">⌁</span><span>Stats</span></button>
+  <button data-page="settings"><span class="nav-icon">⚙</span><span>Settings</span></button>
+</nav>
+
+<div class="modal-backdrop" id="modalBackdrop"><div class="modal" id="modal"></div></div>
+
+<script>
+/* AttendWise PWA single-file architecture.
+   Offline-first with IndexedDB & fallback, optimized for mobile screens and touch devices. */
+const DB_NAME='AttendWiseDB', DB_VERSION=1, STORE='state';
+let db=null, state={academicYears:[],semesters:[],subjects:[],lectures:[],baselines:[],settings:{threshold:75,semesterId:'',yearId:''},corrections:[],noLectureRanges:[]};
+let currentPage='dashboard', selectedDate=todayISO(), calendarMonth=new Date(), selectedCalendarDate=todayISO();
+
+function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2)}
+function todayISO(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function fmtDate(s){if(!s)return '—';return new Date(s+'T00:00:00').toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})}
+function num(v){return Math.max(0,Number(v)||0)}
+function noLectureRangeFor(date){return (state.noLectureRanges||[]).find(r=>date>=r.from&&date<=r.to)}
+function isNoLectureDate(date){return !!noLectureRangeFor(date)}
+function activeSemester(){return state.semesters.find(s=>s.id===state.settings.semesterId)||state.semesters.find(s=>s.status==='active')||null}
+function activeSubjects(){const sem=activeSemester();return state.subjects.filter(s=>!s.archived&&(!sem||s.semesterId===sem.id))}
+function getSubject(id){return state.subjects.find(s=>s.id===id)}
+
+function subjectStats(id){
+  const b=state.baselines.filter(x=>x.subjectId===id).reduce((a,x)=>({p:a.p+num(x.present),t:a.t+num(x.total)}),{p:0,t:0});
+  const l=state.lectures.filter(x=>x.subjectId===id&&['present','absent'].includes(x.status)&&!isNoLectureDate(x.date));
+  const p=b.p+l.filter(x=>x.status==='present').length,t=b.t+l.length;
+  const threshold=Number(getSubject(id)?.threshold??state.settings.threshold??75);
+  const pct=t?100*p/t:0, safe=t&&pct>=threshold?Math.max(0,Math.floor(p/(threshold/100)-t+1e-9)):0;
+  const recover=pct>=threshold?0:(threshold>=100?Infinity:Math.max(0,Math.ceil(((threshold/100)*t-p)/(1-threshold/100)-1e-10)));
+  return {p,t,a:t-p,pct,threshold,safe,recover};
+}
+
+function allStats(){
+  const ids=activeSubjects().map(s=>s.id), x=ids.map(getSubject).filter(Boolean);
+  const p=x.reduce((n,s)=>n+subjectStats(s.id).p,0),t=x.reduce((n,s)=>n+subjectStats(s.id).t,0);
+  return {p,t,a:t-p,pct:t?100*p/t:0};
+}
+
+function openDB(){
+ return new Promise(resolve=>{
+  if(!('indexedDB'in window)){resolve(false);return}
+  const req=indexedDB.open(DB_NAME,DB_VERSION);
+  req.onupgradeneeded=()=>{const d=req.result;if(!d.objectStoreNames.contains(STORE))d.createObjectStore(STORE)};
+  req.onsuccess=()=>{db=req.result;resolve(true)};req.onerror=()=>resolve(false);
+ });
+}
+
+async function loadState(){
+ const ok=await openDB();
+ if(ok){try{const v=await new Promise((res,rej)=>{const tx=db.transaction(STORE,'readonly'),r=tx.objectStore(STORE).get('main');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});if(v)state=v;return}catch(e){}}
+ try{const v=JSON.parse(localStorage.getItem('attendwise-state')||'null');if(v)state=v}catch(e){}
+}
+
+async function saveState(){
+ if(db){
+  try{
+   await new Promise((res,rej)=>{
+    const tx=db.transaction(STORE,'readwrite');
+    tx.objectStore(STORE).put(state,'main');
+    tx.oncomplete=res;tx.onerror=()=>rej(tx.error);tx.onabort=()=>rej(tx.error||new Error('Local save failed'));
+   });
+   return;
+  }catch(e){console.error('IndexedDB save failed; using localStorage fallback.',e)}
+ }
+ try{localStorage.setItem('attendwise-state',JSON.stringify(state))}
+ catch(e){alert('Could not save locally. Storage may be full or disabled.');throw e}
+}
+
+function ensureDefaults(){
+ if(!state.settings)state.settings={threshold:75,semesterId:'',yearId:''};
+ if(!state.academicYears)state.academicYears=[];if(!state.semesters)state.semesters=[];
+ if(!state.subjects)state.subjects=[];if(!state.lectures)state.lectures=[];if(!state.baselines)state.baselines=[];if(!state.corrections)state.corrections=[];if(!state.noLectureRanges)state.noLectureRanges=[];
+}
+
+function page(title,subtitle){
+ document.getElementById('pageTitle').textContent=title;
+ document.getElementById('pageSubtitle').textContent=subtitle;
+}
+
+function go(p){
+ currentPage=p;
+ document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===p));
+ window.scrollTo({top:0,behavior:'smooth'});
+ render();
+}
+
+document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.page)));
+document.getElementById('quickAdd').onclick=()=>subjectModal();
+document.getElementById('quickAttendance').onclick=()=>go('attendance');
+
+function render(){
+ const root=document.getElementById('appContent');
+ if(currentPage==='dashboard'){page('Dashboard','Your attendance at a glance.');root.innerHTML=dashboard()}
+ if(currentPage==='attendance'){page('Attendance entry','Record lectures by date or subject.');root.innerHTML=attendancePage()}
+ if(currentPage==='subjects'){page('Subjects & semesters','Manage courses and initial baselines.');root.innerHTML=subjectsPage()}
+ if(currentPage==='calendar'){page('Calendar & history','Review past attendance and absences.');root.innerHTML=calendarPage()}
+ if(currentPage==='analytics'){page('Analytics','Target predictions and recovery stats.');root.innerHTML=analyticsPage()}
+ if(currentPage==='settings'){page('Settings & backup','Configure thresholds and backups.');root.innerHTML=settingsPage()}
+ bindPageEvents();
+}
+
+function dashboard(){
+ const a=allStats(), subs=activeSubjects();
+ const pct=a.pct, threshold=Number(state.settings.threshold||75);
+ const low=subs.filter(s=>subjectStats(s.id).pct<subjectStats(s.id).threshold);
+ const recent=[...state.lectures].sort((x,y)=>(y.date+(y.createdAt||'')).localeCompare(x.date+(x.createdAt||''))).slice(0,5);
+ return `<div class="grid stats">
+ <div class="card" style="grid-column:span 2"><div class="row"><div><div class="stat-label">Overall attendance</div><div class="stat-value">${a.t?pct.toFixed(1)+'%':'—'}</div><div class="small-text">${a.p} attended of ${a.t} lectures</div></div><div class="donut" style="--value:${a.t?pct:0}%"><strong>${a.t?pct.toFixed(0)+'%':'—'}</strong></div></div></div>
+ <div class="card"><div class="stat-label">Attended</div><div class="stat-value">${a.p}</div><div class="small-text">Across courses</div></div>
+ <div class="card"><div class="stat-label">Missed</div><div class="stat-value" style="background:linear-gradient(100deg,#be4c47,#8d2d28);-webkit-background-clip:text;color:transparent">${a.a}</div><div class="small-text">Recorded absences</div></div>
+ </div>
+ ${low.length?`<div class="notice" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap"><div>⚠️ <strong>${low.length} subject(s)</strong> are currently below their required attendance criteria.</div><button class="btn small" onclick="go('analytics')">View fix plan</button></div>`:''}
+ ${!state.semesters.length?`<div class="notice">👋 Welcome! Start by setting up your academic year & semester, then add your subjects to track your daily attendance.</div>`:''}
+ <div class="grid two">
+ <section class="card"><div class="row"><h2 style="margin:0;font-size:17px;font-weight:750">Subject overview</h2><button class="btn small" onclick="go('subjects')">Manage</button></div>
+ ${subs.length?`<div class="grid subject-grid" style="margin-top:14px">${subs.map(s=>subjectCard(s)).join('')}</div>`:`<div class="empty">No active subjects found.<br><button class="btn primary" style="margin-top:12px" onclick="subjectModal()">＋ Add your first subject</button></div>`}</section>
+ 
+ <section class="card"><h2 style="margin:0 0 12px;font-size:17px;font-weight:750">Quick actions</h2>
+ <div class="grid" style="gap:8px">
+ <button class="btn primary" onclick="go('attendance')">✓ Record today's lectures</button>
+ <button class="btn" onclick="go('calendar')">📅 Check attendance calendar</button>
+ <button class="btn" onclick="go('analytics')">⌁ Safe absence calculator</button>
+ </div>
+ <div class="section-head"><h2>Attention required</h2></div>
+ ${low.length?low.map(s=>{let x=subjectStats(s.id);return `<div class="row" style="padding:8px 0;border-bottom:1px solid rgba(145,185,165,.18)"><div><strong>${esc(s.name)}</strong><div class="small-text">${x.pct.toFixed(1)}% · Target ${x.threshold}%</div></div><span class="pill bad">Below target</span></div>`}).join(''):`<div class="success-note">🎉 All active subjects meet or exceed their configured target threshold!</div>`}
+ </section>
+ </div>
+ 
+ <div class="section-head"><h2>Recent attendance log</h2><button class="btn small" onclick="go('calendar')">History</button></div>
+ <div class="card">${recent.length?`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Subject</th><th>Lecture</th><th>Status</th></tr></thead><tbody>${recent.map(l=>`<tr><td>${fmtDate(l.date)}</td><td>${esc(getSubject(l.subjectId)?.name||'Subject')}</td><td>${esc(l.label||'Lecture')}</td><td>${statusPill(l.status)}</td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">No recent attendance logged yet. Mark today's lectures to start tracking.</div>`}</div>`;
+}
+
+function subjectCard(s){
+ const x=subjectStats(s.id),cls=x.pct<x.threshold?'bad':x.pct<x.threshold+5?'warn':'good',bar=cls==='bad'?'badbar':cls==='warn'?'warnbar':'';
+ return `<div class="card subject-card">
+ <div class="subject-title"><div><h3>${esc(s.name)}</h3><div class="small-text">${esc(s.code||s.category||'Theory')}</div></div><span class="pill ${cls}">${x.t?x.pct.toFixed(1)+'%':'No data'}</span></div>
+ <div class="progress"><span class="${bar}" style="width:${Math.min(100,x.pct)}%"></span></div>
+ <div class="row small-text"><span>${x.p} attended · ${x.a} missed</span><span>${x.t} total</span></div>
+ <div class="row"><span class="small-text">Target ${x.threshold}%</span><strong style="font-size:12.5px;color:#244234">${x.t&&x.pct>=x.threshold?x.safe+' safe skips':x.t?(Number.isFinite(x.recover)?'Attend '+x.recover+' more':'100% target cannot be reached'):'—'}</strong></div>
+ </div>`;
+}
+
+function statusPill(s){
+  let c=s==='present'?'good':s==='absent'?'bad':s==='pending'?'warn':'neutral';
+  let label=s==='present'?'🟢 Present':s==='absent'?'🔴 Absent':s==='pending'?'🟡 Pending':'⚪ Canceled';
+  return `<span class="pill ${c}">${label}</span>`;
+}
+
+function attendancePage(){
+ const subs=activeSubjects();
+ return `<div class="tabs"><button class="active" data-att-tab="daily">Daily batch entry</button><button data-att-tab="subject">Single lecture entry</button></div>
+ <div id="dailyPanel">
+   <div class="card">
+     <div class="row wrap" style="gap:10px">
+       <div><h2 style="margin:0;font-size:17.5px;font-weight:750">Record daily attendance</h2><div class="small-text">Log attendance for lectures that occurred today.</div></div>
+       <div class="field" style="min-width:160px"><label>Date</label><input type="date" id="dailyDate" value="${selectedDate}"></div>
+     </div>
+     ${!subs.length?'<div class="empty">Please add active subjects first before marking attendance.</div>':`
+     <div id="dailyRows" style="margin-top:14px">${subs.map(s=>dailySubjectRow(s)).join('')}</div>
+     <div class="row wrap" style="margin-top:18px;gap:10px">
+       <button class="btn" id="addDailySubject">＋ Add extra subject</button>
+       <button class="btn primary" id="saveDaily" style="flex:1;min-width:180px">✓ Save day's attendance</button>
+     </div>`}
+   </div>
+ </div>
+ 
+ <div id="subjectPanel" class="hidden">
+   <div class="card">
+     <h2 style="margin:0 0 14px;font-size:17.5px;font-weight:750">Quick single lecture entry</h2>
+     <div class="form-grid">
+       <div class="field"><label>Subject</label><select id="quickSubject">${subs.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select></div>
+       <div class="field"><label>Date</label><input type="date" id="quickDate" value="${selectedDate}"></div>
+       <div class="field"><label>Lecture label / period</label><input id="quickLabel" placeholder="e.g. Period 1, Lab session"></div>
+       <div class="field"><label>Status</label><select id="quickStatus"><option value="present">🟢 Present</option><option value="absent">🔴 Absent</option><option value="pending">🟡 Pending</option><option value="not_conducted">⚪ Canceled / Not conducted</option></select></div>
+     </div>
+     <div class="row wrap" style="margin-top:16px;gap:10px">
+       <span class="small-text" style="flex:1;min-width:180px">Records immediately reflect in overall stats & calendar.</span>
+       <button class="btn primary" id="addQuickLecture" style="min-width:140px">Add lecture</button>
+     </div>
+   </div>
+ </div>`;
+}
+
+function dailySubjectRow(s){
+ const existing=state.lectures.filter(l=>l.subjectId===s.id&&l.date===selectedDate);
+ const items=existing.length?existing:[{id:'new-'+uid(),label:'Lecture 1',status:'present',isNew:true}];
+ return `<div class="daily-subject" data-subject="${s.id}">
+   <div class="row" style="margin-bottom:6px">
+     <strong style="color:#244234;font-size:14.5px">${esc(s.name)}</strong>
+     <button class="btn small add-lecture-row" data-subject="${s.id}">＋ Lecture</button>
+   </div>
+   <div class="lecture-list">${items.map(l=>lectureInput(l,s.id)).join('')}</div>
+ </div>`;
+}
+
+function lectureInput(l,subjectId){
+ const status = l.status || 'present';
+ return `<div class="lecture-row status-${status}" data-id="${l.id}" data-new="${l.isNew?'1':'0'}">
+   <input class="lecture-label" value="${esc(l.label||'Lecture')}" aria-label="Lecture label" placeholder="Lecture label">
+   <select class="status-select lecture-status" onchange="updateLectureRowColor(this)">
+     <option value="present" ${status==='present'?'selected':''}>🟢 Present</option>
+     <option value="absent" ${status==='absent'?'selected':''}>🔴 Absent</option>
+     <option value="pending" ${status==='pending'?'selected':''}>🟡 Pending</option>
+     <option value="not_conducted" ${status==='not_conducted'?'selected':''}>⚪ Canceled / Not conducted</option>
+   </select>
+   <button class="btn small danger remove-lecture">✕ Remove</button>
+ </div>`;
+}
+
+function updateLectureRowColor(sel){
+ const row = sel.closest('.lecture-row');
+ if(!row) return;
+ row.classList.remove('status-present','status-absent','status-pending','status-not_conducted');
+ row.classList.add('status-' + sel.value);
+}
+
+function subjectsPage(){
+ const years=state.academicYears,sem=activeSemester();
+ return `<div class="grid two">
+   <div class="card">
+     <div class="row"><h2 style="margin:0;font-size:17.5px;font-weight:750">Academic structure</h2><button class="btn small" onclick="yearModal()">＋ Year</button></div>
+     <div class="field" style="margin-top:14px"><label>Active academic year</label><select id="yearSelect"><option value="">Select academic year</option>${years.map(y=>`<option value="${y.id}" ${state.settings.yearId===y.id?'selected':''}>${esc(y.name)}</option>`).join('')}</select></div>
+     <div class="field" style="margin-top:12px"><label>Active semester</label><select id="semesterSelect"><option value="">Select semester</option>${state.semesters.map(s=>`<option value="${s.id}" ${state.settings.semesterId===s.id?'selected':''}>${esc(s.name)}</option>`).join('')}</select></div>
+     <button class="btn primary" style="margin-top:14px;width:100%" onclick="semesterModal()">＋ Create new semester</button>
+     <div class="small-text" style="margin-top:8px">Each semester maintains separate subjects while keeping previous history intact.</div>
+   </div>
+   <div class="card">
+     <h2 style="margin:0 0 10px;font-size:17.5px;font-weight:750">Add subject</h2>
+     <p class="muted" style="margin-bottom:14px">Subjects have customizable threshold requirements and support starting baseline numbers.</p>
+     <button class="btn primary" style="width:100%" onclick="subjectModal()">＋ Add subject</button>
+   </div>
+ </div>
+ 
+ <div class="section-head">
+   <h2>Subjects ${sem?'· '+esc(sem.name):''}</h2>
+   <span class="small-text">${activeSubjects().length} active</span>
+ </div>
+ 
+ <div class="card">
+   ${state.subjects.length?`
+   <div class="table-wrap">
+     <table>
+       <thead><tr><th>Subject</th><th>Type</th><th>Attendance</th><th>Target</th><th>Actions</th></tr></thead>
+       <tbody>${state.subjects.map(s=>{let x=subjectStats(s.id);return `<tr>
+         <td><strong>${esc(s.name)}</strong><div class="small-text">${esc(s.code||'')}</div></td>
+         <td>${esc(s.category||'Theory')}</td>
+         <td><strong>${x.t?x.pct.toFixed(1)+'%':'—'}</strong> <span class="small-text">(${x.p}/${x.t})</span></td>
+         <td>${x.threshold}%</td>
+         <td>
+           <div style="display:flex;gap:4px;flex-wrap:wrap">
+             <button class="btn small" onclick="baselineModal('${s.id}')">Baseline</button>
+             <button class="btn small" onclick="editSubject('${s.id}')">Edit</button>
+             <button class="btn small" onclick="toggleArchive('${s.id}')">${s.archived?'Restore':'Archive'}</button>
+             <button class="btn small danger" onclick="deleteSubject('${s.id}')">Delete</button>
+           </div>
+         </td>
+       </tr>`}).join('')}</tbody>
+     </table>
+   </div>`:'<div class="empty">No subjects added yet. Create a semester and add your subjects.</div>'}
+ </div>`;
+}
+
+function calendarPage(){
+ const y=calendarMonth.getFullYear(),m=calendarMonth.getMonth(),first=new Date(y,m,1),start=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate();
+ const names=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];let cells=names.map(n=>`<div class="cal-head">${n}</div>`).join('');
+ for(let i=0;i<start;i++)cells+=`<div class="cal-day muted-day"></div>`;
+ for(let d=1;d<=days;d++){
+   let date=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,
+       ls=state.lectures.filter(l=>l.date===date&&['present','absent','pending'].includes(l.status)),
+       hasP=ls.some(l=>l.status==='present'),
+       hasA=ls.some(l=>l.status==='absent'),
+       hasPending=ls.some(l=>l.status==='pending'),
+       nr=noLectureRangeFor(date),
+       cl=nr?'holiday':hasA&&hasP?'partial':hasA?'absent':hasPending?'partial':hasP?'present':'',
+       sel=date===selectedCalendarDate?'selected':'';
+   cells+=`<button class="cal-day ${cl} ${sel}" data-cal-date="${date}"><strong>${d}</strong><div class="small-text">${nr?'Holiday':ls.length?ls.length+' cls':''}</div></button>`;
+ }
+ const list=state.lectures.filter(l=>l.date===selectedCalendarDate).sort((a,b)=>(a.label||'').localeCompare(b.label||''));
+ return `<div class="card">
+   <div class="row">
+     <button class="btn small" id="prevMonth">← Prev</button>
+     <h2 style="font-size:16.5px;margin:0;font-weight:750">${calendarMonth.toLocaleDateString(undefined,{month:'long',year:'numeric'})}</h2>
+     <button class="btn small" id="nextMonth">Next →</button>
+   </div>
+   <div class="calendar" style="margin-top:12px">${cells}</div>
+   <div class="small-text" style="margin-top:10px;text-align:center">🟢 Present · 🔴 Absent · 🟡 Mixed/Pending · ⚪ Holiday</div>
+ </div>
+ 
+ <div class="card calendar-detail">
+   <div class="row wrap" style="gap:8px">
+     <h2 style="font-size:17px;margin:0;font-weight:750">Details: ${fmtDate(selectedCalendarDate)}</h2>
+     <button class="btn small primary" onclick="go('attendance');selectedDate='${selectedCalendarDate}';render()">＋ Log for this date</button>
+   </div>
+   ${noLectureRangeFor(selectedCalendarDate)?`<div class="notice" style="margin-top:10px">${esc(noLectureRangeFor(selectedCalendarDate).label||'Lecture not conducted')} · Excluded from attendance calculations.</div>`:''}
+   ${list.length?`<div class="table-wrap" style="margin-top:10px"><table><thead><tr><th>Subject</th><th>Lecture</th><th>Status</th><th>Action</th></tr></thead><tbody>${list.map(l=>`<tr><td>${esc(getSubject(l.subjectId)?.name||'Unknown')}</td><td>${esc(l.label||'Lecture')}</td><td>${statusPill(l.status)}</td><td><div style="display:flex;gap:4px"><button class="btn small" onclick="editLecture('${l.id}')">Edit</button><button class="btn small danger" onclick="deleteLecture('${l.id}')">Del</button></div></td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No individual lectures logged for this date.</div>'}
+ </div>`;
+}
+
+function analyticsPage(){
+ const subs=activeSubjects(),a=allStats();
+ return `<div class="grid stats">
+   <div class="card"><div class="stat-label">Overall rate</div><div class="stat-value">${a.t?a.pct.toFixed(1)+'%':'—'}</div></div>
+   <div class="card"><div class="stat-label">Attended</div><div class="stat-value">${a.p}</div></div>
+   <div class="card"><div class="stat-label">Absent</div><div class="stat-value">${a.a}</div></div>
+   <div class="card"><div class="stat-label">Total classes</div><div class="stat-value">${a.t}</div></div>
+ </div>
+ 
+ <div class="grid two">
+   <div class="card">
+     <h2 style="font-size:17.5px;margin:0 0 14px;font-weight:750">Subject percentage comparison</h2>
+     ${subs.length?subs.map(s=>{let x=subjectStats(s.id);return `<div style="margin:14px 0">
+       <div class="row"><strong>${esc(s.name)}</strong><strong>${x.t?x.pct.toFixed(1)+'%':'—'}</strong></div>
+       <div class="chart-track" style="margin:8px 0"><div class="chart-fill" style="width:${Math.min(100,x.pct)}%;${x.pct<x.threshold?'background:linear-gradient(90deg,#e0524d,#be3b36)':''}"></div></div>
+       <div class="row small-text"><span>${x.p}/${x.t} attended</span><span>Target: ${x.threshold}%</span></div>
+     </div>`}).join(''):'<div class="empty">No active subjects to analyze.</div>'}
+   </div>
+   
+   <div class="card">
+     <h2 style="font-size:17.5px;margin:0 0 12px;font-weight:750">Safe skips & recovery guide</h2>
+     <div class="field"><label>Select subject</label><select id="calcSubject">${subs.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select></div>
+     <div id="calcResult" style="margin-top:14px"></div>
+   </div>
+ </div>
+ 
+ <div class="card" style="margin-top:14px">
+   <h2 style="font-size:17.5px;margin:0 0 12px;font-weight:750">Future projection simulator</h2>
+   <div class="form-grid">
+     <div class="field"><label>Subject</label><select id="simSubject">${subs.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select></div>
+     <div class="field"><label>Upcoming lectures</label><input type="number" min="1" max="200" id="simCount" value="5"></div>
+     <div class="field full"><label>Simulation scenario</label><select id="simScenario"><option value="present">Attend all future lectures</option><option value="absent">Miss all future lectures</option></select></div>
+   </div>
+   <div id="simResult" class="success-note" style="margin-top:12px">Choose a subject and count to forecast projected attendance.</div>
+ </div>`;
+}
+
+function settingsPage(){
+ return `<div class="grid two">
+   <div class="card">
+     <h2 style="font-size:17.5px;margin:0 0 12px;font-weight:750">Attendance criteria</h2>
+     <div class="field"><label>Default minimum target attendance (%)</label><input type="number" min="1" max="100" id="defaultThreshold" value="${Number(state.settings.threshold||75)}"></div>
+     <button class="btn primary" style="margin-top:14px;width:100%" id="saveSettings">Save default criteria</button>
+     <p class="small-text" style="margin-top:8px">Each subject can also override this requirement individually.</p>
+   </div>
+   
+   <div class="card">
+     <h2 style="font-size:17.5px;margin:0 0 12px;font-weight:750">No-lecture / vacation dates</h2>
+     <p class="muted">Dates in this range are excluded from calculations.</p>
+     <div class="form-grid">
+       <div class="field"><label>From</label><input type="date" id="noLectureFrom"></div>
+       <div class="field"><label>To</label><input type="date" id="noLectureTo"></div>
+       <div class="field full"><label>Reason / holiday name</label><input id="noLectureLabel" placeholder="e.g. Festival vacation"></div>
+     </div>
+     <button class="btn primary" style="margin-top:12px;width:100%" id="addNoLectureRange">＋ Add no-lecture date range</button>
+     <div style="margin-top:14px">
+       <div class="stat-label">Active holiday ranges</div>
+       ${(state.noLectureRanges||[]).length?state.noLectureRanges.map(r=>`<div class="row wrap" style="padding:8px 0;border-bottom:1px solid rgba(145,185,165,.2)"><div style="flex:1"><strong>${fmtDate(r.from)} – ${fmtDate(r.to)}</strong><div class="small-text">${esc(r.label||'No lecture')}</div></div><button class="btn small danger" onclick="deleteNoLectureRange('${r.id}')">Delete</button></div>`).join(''):'<div class="small-text" style="margin-top:6px">No date ranges added yet.</div>'}
+     </div>
+   </div>
+ </div>
+ 
+ <div class="grid two" style="margin-top:14px">
+   <div class="card">
+     <h2 style="font-size:17.5px;margin:0 0 12px;font-weight:750">Backup & restore</h2>
+     <p class="muted">Never lose attendance records. Export a JSON backup to your phone downloads or cloud drive.</p>
+     <div class="grid" style="gap:8px">
+       <button class="btn primary" id="exportJson">⬇ Export full backup (JSON)</button>
+       <button class="btn" id="exportCsv">⬇ Export lectures (CSV)</button>
+       <label class="btn" style="text-align:center">⬆ Restore from JSON backup<input type="file" id="importJson" accept=".json,application/json" hidden></label>
+     </div>
+   </div>
+   
+   <div class="card">
+     <h2 style="font-size:17.5px;margin:0 0 12px;font-weight:750">Device storage & reset</h2>
+     <p class="muted">AttendWise runs 100% in your browser using IndexedDB. No external servers track your data.</p>
+     <button class="btn danger" style="width:100%" id="clearData">🗑 Reset and clear all data</button>
+   </div>
+ </div>`;
+}
+
+function bindPageEvents(){
+ if(currentPage==='attendance')bindAttendance();
+ if(currentPage==='subjects'){
+  document.getElementById('yearSelect')?.addEventListener('change',e=>{state.settings.yearId=e.target.value;saveState();render()});
+  document.getElementById('semesterSelect')?.addEventListener('change',e=>{state.settings.semesterId=e.target.value;saveState();render()});
+ }
+ if(currentPage==='calendar'){
+  document.getElementById('prevMonth').onclick=()=>{calendarMonth.setMonth(calendarMonth.getMonth()-1);render()};
+  document.getElementById('nextMonth').onclick=()=>{calendarMonth.setMonth(calendarMonth.getMonth()+1);render()};
+  document.querySelectorAll('[data-cal-date]').forEach(b=>b.onclick=()=>{selectedCalendarDate=b.dataset.calDate;render()});
+ }
+ if(currentPage==='analytics')bindAnalytics();
+ if(currentPage==='settings')bindSettings();
+}
+
+function bindAttendance(){
+ document.querySelectorAll('[data-att-tab]').forEach(b=>b.onclick=()=>{
+   document.querySelectorAll('[data-att-tab]').forEach(x=>x.classList.toggle('active',x===b));
+   document.getElementById('dailyPanel').classList.toggle('hidden',b.dataset.attTab!=='daily');
+   document.getElementById('subjectPanel').classList.toggle('hidden',b.dataset.attTab!=='subject');
+ });
+ document.getElementById('dailyDate')?.addEventListener('change',e=>{selectedDate=e.target.value;render()});
+ document.getElementById('addDailySubject')?.addEventListener('click',()=>{
+   const subs=activeSubjects().filter(s=>!document.querySelector(`.daily-subject[data-subject="${s.id}"]`));
+   if(!subs.length){alert('All active subjects are already listed below.');return}
+   document.getElementById('dailyRows').insertAdjacentHTML('beforeend',dailySubjectRow(subs[0]));
+   bindRemove();
+ });
+ document.querySelectorAll('.add-lecture-row').forEach(b=>b.onclick=()=>{
+   const list=b.closest('.daily-subject').querySelector('.lecture-list');
+   list.insertAdjacentHTML('beforeend',lectureInput({id:'new-'+uid(),label:'Lecture '+(list.children.length+1),status:'present',isNew:true},b.dataset.subject));
+   bindRemove();
+ });
+ bindRemove();
+ document.getElementById('saveDaily')?.addEventListener('click',saveDaily);
+ document.getElementById('addQuickLecture')?.addEventListener('click',addQuick);
+}
+
+function bindRemove(){
+ document.querySelectorAll('.remove-lecture').forEach(b=>b.onclick=()=>b.closest('.lecture-row').remove());
+}
+
+async function saveDaily(){
+ const date=document.getElementById('dailyDate').value;
+ if(!date){alert('Please pick a date.');return}
+ if(isNoLectureDate(date)){alert('This date falls under a no-lecture range. Remove that range in Settings if a lecture took place.');return}
+ const rows=[...document.querySelectorAll('.daily-subject')];
+ let changed=0;
+ for(const group of rows){
+   const subjectId=group.dataset.subject;
+   for(const row of group.querySelectorAll('.lecture-row')){
+     const label=row.querySelector('.lecture-label').value.trim()||'Lecture',
+           status=row.querySelector('.lecture-status').value,
+           id=row.dataset.id;
+     if(id.startsWith('new-')){
+       if(status==='not_conducted')continue;
+       state.lectures.push({id:uid(),subjectId,date,label,status,createdAt:new Date().toISOString()});
+       changed++;
+     }else{
+       const l=state.lectures.find(x=>x.id===id);
+       if(l){l.date=date;l.label=label;l.status=status;l.updatedAt=new Date().toISOString();changed++}
+     }
+   }
+ }
+ await saveState();
+ alert(`Saved successfully! ${changed} lecture record(s) processed.`);
+ render();
+}
+
+async function addQuick(){
+ const subjectId=document.getElementById('quickSubject')?.value,
+       date=document.getElementById('quickDate')?.value,
+       status=document.getElementById('quickStatus')?.value,
+       label=document.getElementById('quickLabel')?.value.trim()||'Lecture';
+ if(!subjectId){alert('Please select or add a subject.');return}
+ if(!date){alert('Please select a date.');return}
+ if(isNoLectureDate(date)){alert('This date is marked as a no-lecture holiday.');return}
+ if(status!=='not_conducted'&&state.lectures.some(l=>l.subjectId===subjectId&&l.date===date&&l.label.toLowerCase()===label.toLowerCase())){
+   if(!confirm('A lecture with this date and label already exists. Add another entry anyway?'))return;
+ }
+ if(status!=='not_conducted'){
+   state.lectures.push({id:uid(),subjectId,date,status,label,createdAt:new Date().toISOString()});
+ }
+ await saveState();
+ alert(status==='not_conducted'?'Marked as not conducted (not added to counts).':'Lecture added successfully.');
+ render();
+}
+
+function bindAnalytics(){
+ const update=()=>{
+   const id=document.getElementById('calcSubject')?.value;if(!id)return;
+   const x=subjectStats(id),box=document.getElementById('calcResult');
+   box.innerHTML=`<div class="grid stats" style="margin-bottom:10px">
+     <div class="card" style="padding:12px"><div class="stat-label">Current</div><div class="stat-value" style="font-size:22px">${x.t?x.pct.toFixed(1)+'%':'—'}</div></div>
+     <div class="card" style="padding:12px"><div class="stat-label">Safe skips</div><div class="stat-value" style="font-size:22px">${x.t&&x.pct>=x.threshold?x.safe:0}</div></div>
+   </div>
+   <p class="small-text">${x.t&&x.pct>=x.threshold?`You can safely skip up to <strong>${x.safe}</strong> upcoming lecture(s) while maintaining at least ${x.threshold}%.`:(Number.isFinite(x.recover)?`You need to attend <strong>${x.recover}</strong> consecutive upcoming lectures to recover back to your ${x.threshold}% requirement.`:`A 100% target cannot be recovered mathematically while an absence remains.`)}</p>`;
+ };
+ document.getElementById('calcSubject')?.addEventListener('change',update);
+ update();
+
+ const sim=()=>{
+   const id=document.getElementById('simSubject')?.value;if(!id)return;
+   const x=subjectStats(id),n=Math.max(0,Math.floor(num(document.getElementById('simCount').value))),mode=document.getElementById('simScenario').value;
+   const p=x.p+(mode==='present'?n:0),t=x.t+n,pct=t?p/t*100:0;
+   document.getElementById('simResult').innerHTML=`Projected attendance after attending <strong>${n}</strong> ${mode==='present'?'attended':'missed'} lecture(s): <strong style="font-size:15px">${t?pct.toFixed(2)+'%':'—'}</strong>.`;
+ };
+ ['simSubject','simCount','simScenario'].forEach(id=>document.getElementById(id)?.addEventListener('input',sim));
+ sim();
+}
+
+function bindSettings(){
+ document.getElementById('saveSettings').onclick=async()=>{
+   const v=Number(document.getElementById('defaultThreshold').value);
+   if(v<=0||v>100){alert('Criteria threshold must be between 1 and 100.');return}
+   state.settings.threshold=v;
+   await saveState();
+   alert('Default settings saved.');
+   render();
+ };
+ document.getElementById('exportJson').onclick=exportJson;
+ document.getElementById('exportCsv').onclick=exportCsv;
+ document.getElementById('importJson').onchange=importJson;
+ document.getElementById('addNoLectureRange').onclick=addNoLectureRange;
+ document.getElementById('clearData').onclick=async()=>{
+   if(confirm('Warning: This will delete all attendance records in this browser. Export a backup first. Proceed?')&&confirm('Final confirmation: Reset all AttendWise data?')){
+     state={academicYears:[],semesters:[],subjects:[],lectures:[],baselines:[],settings:{threshold:75,semesterId:'',yearId:''},corrections:[],noLectureRanges:[]};
+     await saveState();
+     render();
+   }
+ };
+}
+
+async function addNoLectureRange(){
+ const from=document.getElementById('noLectureFrom').value,to=document.getElementById('noLectureTo').value,label=document.getElementById('noLectureLabel').value.trim();
+ if(!from||!to)return alert('Select both start and end dates.');
+ if(to<from)return alert('End date must be on or after start date.');
+ state.noLectureRanges.push({id:uid(),from,to,label,createdAt:new Date().toISOString()});
+ await saveState();
+ render();
+}
+
+async function deleteNoLectureRange(id){
+ if(!confirm('Delete this date range?'))return;
+ state.noLectureRanges=state.noLectureRanges.filter(r=>r.id!==id);
+ await saveState();
+ render();
+}
+
+function showModal(content){
+ const b=document.getElementById('modalBackdrop');
+ document.getElementById('modal').innerHTML=content;
+ b.classList.add('show');
+ document.body.style.overflow='hidden';
+}
+
+function closeModal(){
+ document.getElementById('modalBackdrop').classList.remove('show');
+ document.body.style.overflow='';
+}
+
+document.getElementById('modalBackdrop').addEventListener('click',e=>{if(e.target.id==='modalBackdrop')closeModal()});
+
+function yearModal(){
+ showModal(`<h2>Add academic year</h2>
+ <div class="field"><label>Academic year name</label><input id="yearName" placeholder="e.g. 2026–2027"></div>
+ <div class="modal-actions"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveYear()">Save year</button></div>`);
+}
+
+async function saveYear(){
+ const name=document.getElementById('yearName').value.trim();
+ if(!name)return alert('Please enter an academic year title.');
+ const y={id:uid(),name};
+ state.academicYears.push(y);
+ state.settings.yearId=y.id;
+ await saveState();
+ closeModal();
+ render();
+}
+
+function semesterModal(){
+ if(!state.academicYears.length){alert('Create an academic year first.');yearModal();return}
+ showModal(`<h2>Add semester</h2>
+ <div class="form-grid">
+   <div class="field full"><label>Semester name</label><input id="semName" placeholder="e.g. Semester 4"></div>
+   <div class="field"><label>Start date</label><input type="date" id="semStart"></div>
+   <div class="field"><label>End date</label><input type="date" id="semEnd"></div>
+   <div class="field full"><label>Academic year</label><select id="semYear">${state.academicYears.map(y=>`<option value="${y.id}" ${state.settings.yearId===y.id?'selected':''}>${esc(y.name)}</option>`).join('')}</select></div>
+ </div>
+ <div class="modal-actions"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveSemester()">Create semester</button></div>`);
+}
+
+async function saveSemester(){
+ const name=document.getElementById('semName').value.trim();
+ if(!name)return alert('Please enter a semester name.');
+ const s={id:uid(),name,yearId:document.getElementById('semYear').value,startDate:document.getElementById('semStart').value,endDate:document.getElementById('semEnd').value,status:'active'};
+ state.semesters.forEach(x=>x.status='archived');
+ state.semesters.push(s);
+ state.settings.semesterId=s.id;
+ state.settings.yearId=s.yearId;
+ await saveState();
+ closeModal();
+ render();
+}
+
+function subjectModal(subject=null){
+ const editing=!!subject;
+ if(!editing&&!activeSemester()){
+   alert('Please create an academic year and semester first.');
+   if(!state.academicYears.length)yearModal();else semesterModal();
+   return;
+ }
+ showModal(`<h2>${editing?'Edit subject':'Add new subject'}</h2>
+ <div class="form-grid">
+   <div class="field full"><label>Subject title</label><input id="subName" value="${esc(subject?.name||'')}" placeholder="e.g. Distributed Systems"></div>
+   <div class="field"><label>Course code (optional)</label><input id="subCode" value="${esc(subject?.code||'')}" placeholder="e.g. CS401"></div>
+   <div class="field"><label>Category</label><select id="subCategory">${['Theory','Practical / Lab','Tutorial','Seminar','Other'].map(v=>`<option ${subject?.category===v?'selected':''}>${v}</option>`).join('')}</select></div>
+   <div class="field"><label>Min target (%)</label><input id="subThreshold" type="number" min="1" max="100" value="${subject?.threshold??state.settings.threshold??75}"></div>
+   <div class="field"><label>Semester</label><select id="subSemester">${state.semesters.map(s=>`<option value="${s.id}" ${(subject?.semesterId||activeSemester()?.id)===s.id?'selected':''}>${esc(s.name)}</option>`).join('')}</select></div>
+ </div>
+ <div class="modal-actions">
+   ${editing?`<button class="btn danger" type="button" style="margin-right:auto" onclick="closeModal();deleteSubject('${subject.id}')">Delete subject</button>`:''}
+   <button class="btn" onclick="closeModal()">Cancel</button>
+   <button class="btn primary" onclick="saveSubject('${subject?.id||''}')">Save subject</button>
+ </div>`);
+}
+
+async function saveSubject(id){
+ const name=document.getElementById('subName').value.trim(),threshold=Number(document.getElementById('subThreshold').value);
+ if(!name)return alert('Please provide a subject title.');
+ if(threshold<=0||threshold>100)return alert('Target must be between 1 and 100%.');
+ const obj={name,code:document.getElementById('subCode').value.trim(),category:document.getElementById('subCategory').value,threshold,semesterId:document.getElementById('subSemester').value};
+ if(id){Object.assign(getSubject(id),obj)}
+ else state.subjects.push({id:uid(),...obj,archived:false,createdAt:new Date().toISOString()});
+ await saveState();
+ closeModal();
+ render();
+}
+
+function editSubject(id){subjectModal(getSubject(id))}
+
+function baselineModal(id){
+ const s=getSubject(id), old=state.baselines.find(x=>x.subjectId===id);
+ const present=old?old.present:0,total=old?old.total:0,cutoff=old?.cutoffDate||todayISO();
+ showModal(`<h2>Initial baseline · ${esc(s.name)}</h2>
+ <p class="muted">Enter already conducted and attended class counts prior to tracking individually. Avoids having to log old classes one by one.</p>
+ <div class="form-grid">
+   <div class="field"><label>Total conducted classes so far</label><input type="number" min="0" id="baseTotal" value="${total}"></div>
+   <div class="field"><label>Classes attended so far</label><input type="number" min="0" id="basePresent" value="${present}"></div>
+   <div class="field full"><label>Cutoff date</label><input type="date" id="baseCutoff" value="${cutoff}"></div>
+ </div>
+ <div class="modal-actions"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveBaseline('${id}')">Save baseline</button></div>`);
+}
+
+async function saveBaseline(id){
+ const total=Math.floor(num(document.getElementById('baseTotal').value)),present=Math.floor(num(document.getElementById('basePresent').value)),cutoff=document.getElementById('baseCutoff').value;
+ if(present>total)return alert('Attended lectures cannot exceed total conducted lectures.');
+ if(!cutoff)return alert('Select a cutoff date.');
+ const existing=state.baselines.find(x=>x.subjectId===id);
+ if(existing)Object.assign(existing,{present,total,cutoffDate:cutoff,updatedAt:new Date().toISOString()});
+ else state.baselines.push({id:uid(),subjectId:id,present,total,cutoffDate:cutoff,createdAt:new Date().toISOString()});
+ await saveState();
+ closeModal();
+ render();
+}
+
+async function toggleArchive(id){const s=getSubject(id);s.archived=!s.archived;await saveState();render()}
+
+async function deleteSubject(id){
+ const s=getSubject(id);
+ if(!s)return;
+ const count=state.lectures.filter(l=>l.subjectId===id).length;
+ const msg=count>0
+   ? `Are you sure you want to delete "${s.name}"?\n\nThis will permanently delete this subject and its ${count} recorded lecture(s).`
+   : `Are you sure you want to delete "${s.name}"?`;
+ if(!confirm(msg))return;
+ state.subjects=state.subjects.filter(x=>x.id!==id);
+ state.lectures=state.lectures.filter(x=>x.subjectId!==id);
+ state.baselines=state.baselines.filter(x=>x.subjectId!==id);
+ await saveState();
+ render();
+}
+function goSubjectEntry(id){go('attendance');setTimeout(()=>{document.querySelector('[data-att-tab="subject"]')?.click();const sel=document.getElementById('quickSubject');if(sel)sel.value=id},0)}
+
+async function editLecture(id){
+ const l=state.lectures.find(x=>x.id===id);if(!l)return;
+ showModal(`<h2>Edit lecture record</h2>
+ <div class="form-grid">
+   <div class="field"><label>Date</label><input id="editDate" type="date" value="${l.date}"></div>
+   <div class="field"><label>Lecture label</label><input id="editLabel" value="${esc(l.label)}"></div>
+   <div class="field full"><label>Status</label><select id="editStatus">${[['present','Present'],['absent','Absent'],['pending','Pending'],['not_conducted','Not conducted']].map(([v,n])=>`<option value="${v}" ${l.status===v?'selected':''}>${n}</option>`).join('')}</select></div>
+ </div>
+ <div class="modal-actions"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveLectureEdit('${id}')">Save changes</button></div>`);
+}
+
+async function saveLectureEdit(id){
+ const l=state.lectures.find(x=>x.id===id);
+ l.date=document.getElementById('editDate').value;
+ l.label=document.getElementById('editLabel').value.trim()||'Lecture';
+ l.status=document.getElementById('editStatus').value;
+ l.updatedAt=new Date().toISOString();
+ await saveState();
+ closeModal();
+ render();
+}
+
+async function deleteLecture(id){
+ if(!confirm('Delete this record?'))return;
+ state.lectures=state.lectures.filter(x=>x.id!==id);
+ await saveState();
+ render();
+}
+
+function exportJson(){
+ const blob=new Blob([JSON.stringify({app:'AttendWise',version:1,exportedAt:new Date().toISOString(),data:state},null,2)],{type:'application/json'});
+ downloadBlob(blob,`attendwise-backup-${todayISO()}.json`);
+}
+
+function exportCsv(){
+ const rows=[['Date','Subject','Subject ID','Lecture','Status'],...state.lectures.map(l=>[l.date,getSubject(l.subjectId)?.name||'',l.subjectId,l.label,l.status])];
+ const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');
+ downloadBlob(new Blob([csv],{type:'text/csv'}),`attendwise-lectures-${todayISO()}.csv`);
+}
+
+function downloadBlob(blob,name){
+ const url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);
+}
+
+async function importJson(e){
+ const f=e.target.files[0];if(!f)return;
+ try{
+   const parsed=JSON.parse(await f.text()),incoming=parsed.data||parsed;
+   if(!incoming.subjects||!incoming.lectures||!incoming.semesters)throw new Error('Invalid AttendWise backup format.');
+   if(!confirm('Importing will replace all local attendance data on this device. Proceed?'))return;
+   state=incoming;
+   ensureDefaults();
+   await saveState();
+   alert('Backup restored successfully!');
+   render();
+ }catch(err){alert('Could not import backup: '+err.message)}
+ e.target.value='';
+}
+
+/* Service Worker Registration for PWA */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.log('SW registration error:', err));
+  });
+}
+
+async function init(){
+ await loadState();
+ ensureDefaults();
+ try{if(navigator.storage?.persist)await navigator.storage.persist()}catch(e){}
+ await saveState();
+ render();
+}
+init();
+</script>
+</body>
+</html>
